@@ -1,6 +1,7 @@
 # GameBoy-Emulator
 will update
-
+ongoing
+seems harder
 
 # References
 [PanDocs](https://gbdev.io/pandocs/)
