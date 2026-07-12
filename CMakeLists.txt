@@ -26,6 +26,12 @@ add_library(
     src/core/cpu/Cpu.cpp
     src/core/bus/Bus.cpp
     src/core/cartridge/Cartridge.cpp
+    src/core/memory/WRam.cpp
+    src/core/memory/HRam.cpp
+    src/core/ppu/Ppu.cpp
+    src/core/timer/Timer.cpp
+    
+    src/core/joypad/Joypad.cpp
 )
 
 target_include_directories(
@@ -34,6 +40,13 @@ target_include_directories(
     src/core/cpu
     src/core/bus
     src/core/cartridge
+    src/core/memory
+    src/core/ppu
+    src/core/timer
+    src/core/dma
+    src/core/serial
+    src/core/joypad
+
 )
 
 

@@ -13,6 +13,7 @@ struct cpuState{
     uint16_t SP;
     uint16_t PC;
 };
+
 /*
 in reg AF Low byte is flag znhc0000
 z=zero 

@@ -27,3 +27,7 @@ bool Cartridge::loadROM(const char* filename){
 uint8_t Cartridge::read(uint16_t addr){
     return ROM[addr];
 }
+
+void Cartridge::write(uint16_t addr, uint8_t byte){
+    ROM[addr]=byte;
+}
