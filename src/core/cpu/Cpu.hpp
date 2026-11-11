@@ -16,11 +16,21 @@ class Cpu{
         Bus* bus = nullptr;
 
         void opNop();
-        void opLdBCd16();
-        void opLdBCa();
+        void opLd_BC_d16();
+        void opLd_aBC_A();
         void opInc_BC();
         void opInc_B();
         void opDec_B();
+        void opLd_B_d8();
+        void opRlca();
+        void opLd_a16_SP();
+        void opAdd_HL_BC();
+        void opLd_A_aBC();
+        void opDec_BC();
+        void opInc_C();
+        void opDec_C();
+        void opLd_C_d8();
+        void opRrca();
 
         using Handler = void (Cpu::*)();
         struct Instruction {
