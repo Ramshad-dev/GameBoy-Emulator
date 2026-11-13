@@ -22,6 +22,22 @@ Cpu::Cpu(Bus* bus){
     OpcodeTable[0x0D] = {&Cpu::opDec_C,     1,  4};
     OpcodeTable[0x0E] = {&Cpu::opLd_C_d8,   2,  4};
     OpcodeTable[0x0F] = {&Cpu::opRrca,      1,  4};
+    OpcodeTable[0x10] = {&Cpu::opStop,      2,  4};
+    OpcodeTable[0x11] = {&Cpu::opLd_DE_d16, 3, 12};
+    OpcodeTable[0x12] = {&Cpu::opLd_aDE_A,  1,  8};
+    OpcodeTable[0x13] = {&Cpu::opInc_DE,    1,  8};
+    OpcodeTable[0x14] = {&Cpu::opInc_D,     1,  4};
+    OpcodeTable[0x15] = {&Cpu::opDec_D,     1,  4};
+    OpcodeTable[0x16] = {&Cpu::opLd_D_d8,   2,  8};
+    OpcodeTable[0x17] = {&Cpu::opRla,       1,  4};
+    OpcodeTable[0x18] = {&Cpu::opJr_e8,     2, 12};
+    OpcodeTable[0x19] = {&Cpu::opAdd_HL_DE, 1,  8};
+    OpcodeTable[0x1A] = {&Cpu::opLd_A_aDE,  1,  8};
+    OpcodeTable[0x1B] = {&Cpu::opDec_DE,    1,  8};
+    OpcodeTable[0x1C] = {&Cpu::opInc_E,     1,  4};
+    OpcodeTable[0x1D] = {&Cpu::opDec_E,     1,  4};
+    OpcodeTable[0x1E] = {&Cpu::opLd_E_d8,   2,  4};
+    OpcodeTable[0x1F] = {&Cpu::opRra,      1,  4};
 }
 
 void Cpu::reset(){
@@ -111,7 +127,7 @@ void Cpu::opAdd_HL_BC(){
 }
 
 void Cpu::opLd_A_aBC(){
-    State.AF.high=bus->read(State.AF.Word);
+    State.AF.high=bus->read(State.BC.Word);
 }
 
 void Cpu::opDec_BC(){
@@ -148,3 +164,107 @@ void Cpu::opRrca(){
     clearFlag(State,FLAG_H);
     updateFlag(State,FLAG_C,carry);
 }
+
+void Cpu::opStop(){
+    stopped=true;
+}
+
+void Cpu::opLd_DE_d16(){
+    State.DE.Word=fetch16();
+}
+
+void Cpu::opLd_aDE_A(){
+    bus->write(State.DE.Word,State.AF.high);
+}
+
+void Cpu::opInc_DE(){
+    State.DE.Word++;
+}
+
+void Cpu::opInc_D(){
+    if((State.DE.high & 0x0F)==0x0F)setFlag(State,FLAG_H);
+    else clearFlag(State,FLAG_H);
+    State.DE.high++;
+    if(State.DE.high==0x00) setFlag(State,FLAG_Z);
+    else clearFlag(State,FLAG_Z);
+    clearFlag(State,FLAG_N);
+}
+
+void Cpu::opDec_D(){
+    if((State.DE.high & 0x0F)==0x00) setFlag(State,FLAG_H);
+    else clearFlag(State,FLAG_H);
+    State.DE.high--;
+    if(State.DE.high==0x00) setFlag(State,FLAG_Z);
+    else clearFlag(State,FLAG_Z);
+    setFlag(State,FLAG_N);
+}
+
+void Cpu::opLd_D_d8(){
+    State.DE.high=fetch8();
+}
+
+void Cpu::opRla(){
+    bool oldcarry = getFlag(State,FLAG_C);
+    bool carry = (State.AF.high & 0x80)>>7;
+    State.AF.high = (State.AF.high<<1) | oldcarry;
+    clearFlag(State,FLAG_Z);
+    clearFlag(State,FLAG_N);
+    clearFlag(State,FLAG_H);
+    updateFlag(State,FLAG_C,carry);
+}
+
+void Cpu::opJr_e8(){
+    int8_t e8 = static_cast<int8_t>(fetch8());
+    State.PC += e8;
+}
+
+void Cpu::opAdd_HL_DE(){
+    uint32_t res = State.HL.Word + State.DE.Word;
+    clearFlag(State,FLAG_N);
+    if((State.HL.Word & 0x0FFF)+(State.DE.Word & 0x0FFF)>0x0FFF) setFlag(State,FLAG_H);
+    else clearFlag(State,FLAG_H);
+    if(res>0xFFFF) setFlag(State,FLAG_C);
+    else clearFlag(State,FLAG_C);
+    State.HL.Word = res & 0xFFFF;
+}
+
+void Cpu::opLd_A_aDE(){
+    State.AF.high=bus->read(State.DE.Word);
+}
+
+void Cpu::opDec_DE(){
+    State.DE.Word--;
+}
+
+void Cpu::opInc_E(){
+    if((State.DE.low & 0x0F)==0x0F)setFlag(State,FLAG_H);
+    else clearFlag(State,FLAG_H);
+    State.DE.low++;
+    if(State.DE.low==0x00) setFlag(State,FLAG_Z);
+    else clearFlag(State,FLAG_Z);
+    clearFlag(State,FLAG_N);
+}
+
+void Cpu::opDec_E(){
+    if((State.DE.low & 0x0F)==0x00) setFlag(State,FLAG_H);
+    else clearFlag(State,FLAG_H);
+    State.DE.low--;
+    if(State.DE.low==0x00) setFlag(State,FLAG_Z);
+    else clearFlag(State,FLAG_Z);
+    setFlag(State,FLAG_N);
+}
+
+void Cpu::opLd_E_d8(){
+    State.DE.low=fetch8();
+}
+
+void Cpu::opRra(){
+    bool oldcarry = getFlag(State,FLAG_C);
+    bool carry = State.AF.high & 0x01;
+    State.AF.high = (oldcarry<<7) |(State.AF.high>>1) ;
+    clearFlag(State,FLAG_Z);
+    clearFlag(State,FLAG_N);
+    clearFlag(State,FLAG_H);
+    updateFlag(State,FLAG_C,carry);
+}
+

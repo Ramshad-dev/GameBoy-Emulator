@@ -14,7 +14,23 @@ class Cpu{
     private:
         cpuState State;
         Bus* bus = nullptr;
+        bool stopped;
+        bool halted;
 
+        using Handler = void (Cpu::*)();
+        struct Instruction {
+            Handler handler;
+            uint8_t size;
+            uint8_t cycles;
+        };
+        Instruction OpcodeTable[256];
+        Instruction ExtendedOpcodeTable[256];             // 0xCB XX
+
+        
+        uint8_t fetch8();
+        uint16_t fetch16();
+        
+        void execute();
         void opNop();
         void opLd_BC_d16();
         void opLd_aBC_A();
@@ -31,20 +47,20 @@ class Cpu{
         void opDec_C();
         void opLd_C_d8();
         void opRrca();
-
-        using Handler = void (Cpu::*)();
-        struct Instruction {
-            Handler handler;
-            uint8_t size;
-            uint8_t cycles;
-        };
-        Instruction OpcodeTable[256];
-        Instruction ExtendedOpcodeTable[256];             // 0xCB XX
-
-        
-        uint8_t fetch8();
-        uint16_t fetch16();
-        
-        void execute();
-
+        void opStop();
+        void opLd_DE_d16();
+        void opLd_aDE_A();
+        void opInc_DE();
+        void opInc_D();
+        void opDec_D();
+        void opLd_D_d8();
+        void opRla();
+        void opJr_e8();
+        void opAdd_HL_DE();
+        void opLd_A_aDE();
+        void opDec_DE();
+        void opInc_E();
+        void opDec_E();
+        void opLd_E_d8();
+        void opRra();
 };
